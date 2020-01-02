@@ -1,7 +1,6 @@
 import UIKit
 
-var str = "Hello, playground"
-print(str);
+//https://leetcode-cn.com/problems/two-sum/
 
 //两数之和
 //暴力解法
