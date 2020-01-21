@@ -12,7 +12,7 @@
 
 ##### 静态变量的命名
 
-- 通知名：
+- 对外公开的通知名（以AFNetworking开头）：
 
   示例：`NSString * const AFNetworkingReachabilityDidChangeNotification = @"com.alamofire.networking.reachability.change";`
 
@@ -155,13 +155,59 @@ FOUNDATION_EXPORT NSString * const AFNetworkingReachabilityDidChangeNotification
 
 
 
+##### 为修复特殊BUG准备的宏
+
+```objective-c
+#ifndef NSFoundationVersionNumber_iOS_8_0
+#define NSFoundationVersionNumber_With_Fixed_5871104061079552_bug 1140.11
+#else
+#define NSFoundationVersionNumber_With_Fixed_5871104061079552_bug NSFoundationVersionNumber_iOS_8_0
+#endif
+```
+
+
+
+
+
 ##### Block_copy
 
 ##### Block_release
 
 
 
+
+
+### KVC之valueForKeyPath的高级用法
+
+`valueForKeyPath`的妙用，展平二维数组为一维数组。
+
+`valueForKeyPath`后面带有@符号，表示一个特定的集合方法。
+
+```objective-c
+[@[@[@"1",@"2"], [@"3"], [@"4",@"5",@"6"]] valueForKeyPath:@"@unionOfArrays.self"];
+```
+
+
+
+
+
 ### KVO绑定
+
+
+
+### NSLog
+
+重写description方法，能在打印的时候输出想要的信息
+
+这个在做轮子的时候，被调用者可以通过这种方式为调用者提供方便调试信息的输出。
+
+```objective-c
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p, session: %@, operationQueue: %@>", NSStringFromClass([self class]), self, self.session, self.operationQueue];
+}
+```
+
+
 
 
 
