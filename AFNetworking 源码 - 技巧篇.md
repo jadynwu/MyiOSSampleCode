@@ -189,6 +189,28 @@ FOUNDATION_EXPORT NSString * const AFNetworkingReachabilityDidChangeNotification
 
 
 
+### 私有类在.m文件中的规范用法
+
+```objective-c
+//这个声明方法写在需要使用Person对象的顶部
+//让对象可以使用Person公开的属性
+@interface Person : NSObject
+@property (nonatomic, copy) NSString *publicStr1
+@property (nonatomic, copy) NSString *publicStr2
+@end
+
+//写在需要使用Person对象的底部
+@interface Person ()
+@property (nonatomic, copy) NSString *privateStr1
+@property (nonatomic, copy) NSString *privateStr2
+@end
+//实现
+@implementation Person
+@end
+```
+
+
+
 
 
 ### KVO绑定
@@ -206,6 +228,36 @@ FOUNDATION_EXPORT NSString * const AFNetworkingReachabilityDidChangeNotification
     return [NSString stringWithFormat:@"<%@: %p, session: %@, operationQueue: %@>", NSStringFromClass([self class]), self, self.session, self.operationQueue];
 }
 ```
+
+
+
+### NSError优雅的实现方式
+
+在一个业务处理的线性流程中，可能会出现多个Error，这些Error都属于这一条流水线，取任何一个都是不完整的，AFNetworking使用了一个优雅的方式，NSError的userInfo中有一个叫`NSUnderlyingErrorKey`的key，将业务线中的error设置到`NSUnderlyingErrorKey`中。
+
+有点像责任链模式，Error1持有Error2...持有ErrorN，打印Error1就能看到1~n所有的Error信息。
+
+AFNetworking中有一个静态函数就是处理Error的拼接的：
+
+```objective-c
+static NSError * AFErrorWithUnderlyingError(NSError *error, NSError *underlyingError) {
+    if (!error) {
+        return underlyingError;
+    }
+
+    if (!underlyingError || error.userInfo[NSUnderlyingErrorKey]) {
+        return error;
+    }
+
+    //将UnderlyingError拼接到error的userinfo的NSUnderlyingErrorKey处
+    NSMutableDictionary *mutableUserInfo = [error.userInfo mutableCopy];
+    mutableUserInfo[NSUnderlyingErrorKey] = underlyingError;
+    
+    return [[NSError alloc] initWithDomain:error.domain code:error.code userInfo:mutableUserInfo];
+}
+```
+
+
 
 
 
